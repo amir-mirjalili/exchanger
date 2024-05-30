@@ -2,6 +2,9 @@ package com.exchanger.service;
 
 
 import com.exchanger.domain.user.UserEntity;
+import com.exchanger.dto.UserCreateDTO;
+import com.exchanger.dto.UserUpdateDTO;
+import com.exchanger.mapper.UserMapper;
 import com.exchanger.repository.db.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,8 +22,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity save(UserEntity user) {
-        return userRepository.save(user);
+    public UserEntity save(UserCreateDTO user) {
+        UserEntity userEntity = UserMapper.INSTANCE.toInsertEntity(user);
+        return userRepository.save(userEntity);
     }
 
     @Override
@@ -36,5 +40,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(Integer id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserEntity update(UserUpdateDTO user) {
+        var getUser = userRepository.findById(user.getId());
+        if (getUser.isEmpty()) return new UserEntity();
+        var userEntity = UserMapper.INSTANCE.updateEntityFromDto(user, getUser.get());
+        return userRepository.save(userEntity);
     }
 }
